@@ -6,7 +6,7 @@
 
 ## Installation
 
-Please make sure to initialize a Go module before installing core-go/config:
+Please make sure to initialize a Go module before installing common-go/config:
 
 ```shell
 go get -u github.com/common-go/config
@@ -56,7 +56,7 @@ type RootConfig struct {
 func main() {
 	env := os.Getenv("ENV")
 	var conf RootConfig
-	// "authentication" is the directory which contains source code
+	// "authentication" is the directory, which contains source code
 	// "resource" is the directory, which contains application.yaml and application-sit.yaml 
 	config.LoadConfig("authentication", "resource", env, &conf, "application")
 	log.Println("config ", conf)
