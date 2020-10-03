@@ -9,8 +9,16 @@ import (
 	"strings"
 )
 
+func Load(directory string, c interface{}, fileNames ...string) error {
+	return LoadConfig("", directory, c, fileNames...)
+}
+
+func LoadConfig(parentPath string, directory string, c interface{}, fileNames ...string) error {
+	env := os.Getenv("ENV")
+	return LoadConfigWithEnv(parentPath, directory, env, c, fileNames...)
+}
 // Load function will read config from environment or config file.
-func LoadConfig(parentPath string, directory string, env string, c interface{}, fileNames ...string) error {
+func LoadConfigWithEnv(parentPath string, directory string, env string, c interface{}, fileNames ...string) error {
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_", ".", "_"))
 	viper.SetConfigType("yaml")
@@ -49,7 +57,7 @@ func LoadConfig(parentPath string, directory string, env string, c interface{}, 
 			}
 		}
 	}
-	er3 := bindEnvs(c)
+	er3 := BindEnvs(c)
 	if er3 != nil {
 		return er3
 	}
@@ -58,7 +66,7 @@ func LoadConfig(parentPath string, directory string, env string, c interface{}, 
 }
 
 // bindEnvs function will bind ymal file to struc model
-func bindEnvs(conf interface{}, parts ...string) error {
+func BindEnvs(conf interface{}, parts ...string) error {
 	ifv := reflect.Indirect(reflect.ValueOf(conf))
 	ift := reflect.TypeOf(ifv)
 	num := min(ift.NumField(), ifv.NumField())
@@ -71,7 +79,7 @@ func bindEnvs(conf interface{}, parts ...string) error {
 		}
 		switch v.Kind() {
 		case reflect.Struct:
-			return bindEnvs(v.Interface(), append(parts, tv)...)
+			return BindEnvs(v.Interface(), append(parts, tv)...)
 		default:
 			return viper.BindEnv(strings.Join(append(parts, tv), "."))
 		}
@@ -86,7 +94,7 @@ func min(n1 int, n2 int) int {
 	return n2
 }
 
-func LoadMap(parentPath string, directory string, env string, fileNames ...string) (map[string]string, error) {
+func LoadMapWithPath(parentPath string, directory string, env string, fileNames ...string) (map[string]string, error) {
 	innerMap := make(map[string]string)
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_", ".", "_"))
@@ -129,8 +137,15 @@ func LoadMap(parentPath string, directory string, env string, fileNames ...strin
 	er3 := viper.Unmarshal(&innerMap)
 	return innerMap, er3
 }
+func LoadMapWithEnv(directory string, env string, fileNames ...string) (map[string]string, error) {
+	return LoadMapWithPath("", directory, env, fileNames...)
+}
+func LoadMap(directory string, fileNames ...string) (map[string]string, error) {
+	env := os.Getenv("ENV")
+	return LoadMapWithPath("", directory, env, fileNames...)
+}
 
-func LoadFile(parentPath string, directory string, env string, filename string) ([]byte, error) {
+func LoadFileWithPath(parentPath string, directory string, env string, filename string) ([]byte, error) {
 	if len(env) > 0 {
 		indexDot := strings.LastIndex(filename, ".")
 		if indexDot >= 0 {
@@ -150,17 +165,38 @@ func LoadFile(parentPath string, directory string, env string, filename string) 
 	}
 	return ioutil.ReadFile(file)
 }
-
-func LoadCredentials(parentPath string, directory string, env string, filename string) ([]byte, error) {
-	return LoadFile(parentPath, directory, env, filename)
+func LoadFileWithEnv(directory string, env string, filename string) ([]byte, error) {
+	return LoadFileWithPath("", directory, env, filename)
+}
+func LoadFile(directory string, filename string) ([]byte, error) {
+	env := os.Getenv("ENV")
+	return LoadFileWithPath("", directory, env, filename)
 }
 
-func LoadText(parentPath string, directory string, env string, filename string) (string, error) {
-	rs, err := LoadFile(parentPath, directory, env, filename)
+func LoadCredentialsWithPath(parentPath string, directory string, env string, filename string) ([]byte, error) {
+	return LoadFileWithPath(parentPath, directory, env, filename)
+}
+func LoadCredentialsWithEnv(directory string, env string, filename string) ([]byte, error) {
+	return LoadFileWithPath("", directory, env, filename)
+}
+func LoadCredentials(directory string, filename string) ([]byte, error) {
+	env := os.Getenv("ENV")
+	return LoadFileWithPath("", directory, env, filename)
+}
+
+func LoadTextWithPath(parentPath string, directory string, env string, filename string) (string, error) {
+	rs, err := LoadFileWithPath(parentPath, directory, env, filename)
 	if err != nil {
 		return "", err
 	}
 	return string(rs), nil
+}
+func LoadTextWithEnv(directory string, env string, filename string) (string, error) {
+	return LoadTextWithPath("", directory, env, filename)
+}
+func LoadText(directory string, filename string) (string, error) {
+	env := os.Getenv("ENV")
+	return LoadTextWithPath("", directory, env, filename)
 }
 
 func fileExists(filename string) bool {
