@@ -19,11 +19,11 @@ import "github.com/common-go/config"
 ```
 
 ## Example
-We have 2 config files, which are put into "resource" directory
-- the default config file: application.yaml
-- for SIT environment: application-sit.yaml
+We have 2 config files, which are put into "configs" directory
+- the default config file: config.yaml
+- for SIT environment: config-sit.yaml
 
-#### application.yaml
+#### config.yaml
 ```yaml
 ldap:
   server: localhost:389
@@ -33,7 +33,7 @@ redis_url: redis://localhost:6379
 ```
 
 In the SIT environment, we just override the configuration of ldap server and redis server:
-#### application-sit.yaml
+#### config-sit.yaml
 ```yaml
 ldap:
   server: sit-server:389
@@ -57,8 +57,12 @@ func main() {
 	env := os.Getenv("ENV")
 	var conf RootConfig
 	// "authentication" is the directory, which contains source code
-	// "resource" is the directory, which contains application.yaml and application-sit.yaml 
-	config.LoadConfig("authentication", "resource", env, &conf, "application")
+	// "configs" is the directory, which contains config.yaml and config-sit.yaml 
+	config.LoadConfigWithEnv("authentication", "configs", env, &conf, "config")
 	log.Println("config ", conf)
+
+	var conf2 RootConfig
+	config.Load("configs", &conf2, "config")
+	log.Println("config2 ", conf2)
 }
 ```
