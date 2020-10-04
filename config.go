@@ -9,8 +9,8 @@ import (
 	"strings"
 )
 
-func Load(directory string, c interface{}, fileNames ...string) error {
-	return LoadConfig("", directory, c, fileNames...)
+func Load(c interface{}, fileNames ...string) error {
+	return LoadConfig("", "", c, fileNames...)
 }
 
 func LoadConfig(parentPath string, directory string, c interface{}, fileNames ...string) error {
@@ -27,9 +27,13 @@ func LoadConfigWithEnv(parentPath string, directory string, env string, c interf
 		viper.SetConfigName(fileName)
 	}
 
-	viper.AddConfigPath("./" + directory + "/")
-	if len(parentPath) > 0 {
-		viper.AddConfigPath("./" + parentPath + "/" + directory + "/")
+	if len(parentPath) == 0 && len(directory) == 0 {
+		viper.AddConfigPath("./")
+	} else {
+		viper.AddConfigPath("./" + directory + "/")
+		if len(parentPath) > 0 {
+			viper.AddConfigPath("./" + parentPath + "/" + directory + "/")
+		}
 	}
 
 	if er1 := viper.ReadInConfig(); er1 != nil {
@@ -47,13 +51,23 @@ func LoadConfigWithEnv(parentPath string, directory string, env string, c interf
 			viper.SetConfigName(name0)
 			er2a := viper.MergeInConfig()
 			if er2a != nil {
-				return er2a
+				switch er2a.(type) {
+				case viper.ConfigFileNotFoundError:
+					log.Println("config file not found")
+				default:
+					return er2a
+				}
 			}
 			name1 := fileName2 + "-" + env2
 			viper.SetConfigName(name1)
 			er2b := viper.MergeInConfig()
 			if er2b != nil {
-				return er2b
+				switch er2b.(type) {
+				case viper.ConfigFileNotFoundError:
+					log.Println("config file not found")
+				default:
+					return er2b
+				}
 			}
 		}
 	}
@@ -104,9 +118,13 @@ func LoadMapWithPath(parentPath string, directory string, env string, fileNames 
 		viper.SetConfigName(fileName)
 	}
 
-	viper.AddConfigPath("./" + directory + "/")
-	if len(parentPath) > 0 {
-		viper.AddConfigPath("./" + parentPath + "/" + directory + "/")
+	if len(parentPath) == 0 && len(directory) == 0 {
+		viper.AddConfigPath("./")
+	} else {
+		viper.AddConfigPath("./" + directory + "/")
+		if len(parentPath) > 0 {
+			viper.AddConfigPath("./" + parentPath + "/" + directory + "/")
+		}
 	}
 
 	if er1 := viper.ReadInConfig(); er1 != nil {
@@ -124,64 +142,93 @@ func LoadMapWithPath(parentPath string, directory string, env string, fileNames 
 			viper.SetConfigName(name0)
 			er2a := viper.MergeInConfig()
 			if er2a != nil {
-				return nil, er2a
+				switch er2a.(type) {
+				case viper.ConfigFileNotFoundError:
+					log.Println("config file not found")
+				default:
+					return nil, er2a
+				}
 			}
 			name1 := fileName2 + "-" + env2
 			viper.SetConfigName(name1)
 			er2b := viper.MergeInConfig()
 			if er2b != nil {
-				return nil, er2b
+				switch er2b.(type) {
+				case viper.ConfigFileNotFoundError:
+					log.Println("config file not found")
+				default:
+					return nil, er2b
+				}
 			}
 		}
 	}
 	er3 := viper.Unmarshal(&innerMap)
 	return innerMap, er3
 }
-func LoadMapWithEnv(directory string, env string, fileNames ...string) (map[string]string, error) {
-	return LoadMapWithPath("", directory, env, fileNames...)
+func LoadMapWithEnv(env string, fileNames ...string) (map[string]string, error) {
+	return LoadMapWithPath("", "", env, fileNames...)
 }
-func LoadMap(directory string, fileNames ...string) (map[string]string, error) {
+func LoadMap(fileNames ...string) (map[string]string, error) {
 	env := os.Getenv("ENV")
-	return LoadMapWithPath("", directory, env, fileNames...)
+	return LoadMapWithPath("", "", env, fileNames...)
 }
 
 func LoadFileWithPath(parentPath string, directory string, env string, filename string) ([]byte, error) {
-	if len(env) > 0 {
-		indexDot := strings.LastIndex(filename, ".")
-		if indexDot >= 0 {
-			file := "./" + directory + "/" + filename[0:indexDot] + "-" + env + filename[indexDot:]
-			if !fileExists(file) {
-				file = "./" + parentPath + "/" + directory + "/" + filename[0:indexDot] + "-" + env + filename[indexDot:]
-			}
-			if fileExists(file) {
-				return ioutil.ReadFile(file)
+	if len(directory) > 0 {
+		if len(env) > 0 {
+			indexDot := strings.LastIndex(filename, ".")
+			if indexDot >= 0 {
+				file := "./" + directory + "/" + filename[0:indexDot] + "-" + env + filename[indexDot:]
+				if !fileExists(file) {
+					file = "./" + parentPath + "/" + directory + "/" + filename[0:indexDot] + "-" + env + filename[indexDot:]
+				}
+				if fileExists(file) {
+					return ioutil.ReadFile(file)
+				}
 			}
 		}
+		file := "./" + directory + "/" + filename
+		if !fileExists(file) {
+			file = "./" + parentPath + "/" + directory + "/" + filename
+		}
+		return ioutil.ReadFile(file)
+	} else {
+		if len(env) > 0 {
+			indexDot := strings.LastIndex(filename, ".")
+			if indexDot >= 0 {
+				file := "./" + filename[0:indexDot] + "-" + env + filename[indexDot:]
+				if !fileExists(file) {
+					file = "./" + parentPath +  "/" + filename[0:indexDot] + "-" + env + filename[indexDot:]
+				}
+				if fileExists(file) {
+					return ioutil.ReadFile(file)
+				}
+			}
+		}
+		file := "./" + filename
+		if !fileExists(file) {
+			file = "./" + parentPath + "/" + filename
+		}
+		return ioutil.ReadFile(file)
 	}
-
-	file := "./" + directory + "/" + filename
-	if !fileExists(file) {
-		file = "./" + parentPath + "/" + directory + "/" + filename
-	}
-	return ioutil.ReadFile(file)
 }
-func LoadFileWithEnv(directory string, env string, filename string) ([]byte, error) {
-	return LoadFileWithPath("", directory, env, filename)
+func LoadFileWithEnv(env string, filename string) ([]byte, error) {
+	return LoadFileWithPath("", "", env, filename)
 }
-func LoadFile(directory string, filename string) ([]byte, error) {
+func LoadFile(filename string) ([]byte, error) {
 	env := os.Getenv("ENV")
-	return LoadFileWithPath("", directory, env, filename)
+	return LoadFileWithPath("", "", env, filename)
 }
 
 func LoadCredentialsWithPath(parentPath string, directory string, env string, filename string) ([]byte, error) {
 	return LoadFileWithPath(parentPath, directory, env, filename)
 }
-func LoadCredentialsWithEnv(directory string, env string, filename string) ([]byte, error) {
-	return LoadFileWithPath("", directory, env, filename)
+func LoadCredentialsWithEnv(env string, filename string) ([]byte, error) {
+	return LoadFileWithPath("", "", env, filename)
 }
-func LoadCredentials(directory string, filename string) ([]byte, error) {
+func LoadCredentials(filename string) ([]byte, error) {
 	env := os.Getenv("ENV")
-	return LoadFileWithPath("", directory, env, filename)
+	return LoadFileWithPath("", "", env, filename)
 }
 
 func LoadTextWithPath(parentPath string, directory string, env string, filename string) (string, error) {
@@ -194,9 +241,9 @@ func LoadTextWithPath(parentPath string, directory string, env string, filename 
 func LoadTextWithEnv(directory string, env string, filename string) (string, error) {
 	return LoadTextWithPath("", directory, env, filename)
 }
-func LoadText(directory string, filename string) (string, error) {
+func LoadText(filename string) (string, error) {
 	env := os.Getenv("ENV")
-	return LoadTextWithPath("", directory, env, filename)
+	return LoadTextWithPath("", "", env, filename)
 }
 
 func fileExists(filename string) bool {
