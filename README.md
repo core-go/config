@@ -62,7 +62,7 @@ func main() {
 	log.Println("config ", conf)
 
 	var conf2 RootConfig
-	config.Load("configs", &conf2, "config")
+	config.Load(&conf2, "configs/config")
 	log.Println("config2 ", conf2)
 }
 ```
