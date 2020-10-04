@@ -53,7 +53,7 @@ func LoadConfigWithEnv(parentPath string, directory string, env string, c interf
 			if er2a != nil {
 				switch er2a.(type) {
 				case viper.ConfigFileNotFoundError:
-					log.Println("config file not found")
+					break
 				default:
 					return er2a
 				}
@@ -64,7 +64,7 @@ func LoadConfigWithEnv(parentPath string, directory string, env string, c interf
 			if er2b != nil {
 				switch er2b.(type) {
 				case viper.ConfigFileNotFoundError:
-					log.Println("config file not found")
+					break
 				default:
 					return er2b
 				}
@@ -144,7 +144,7 @@ func LoadMapWithPath(parentPath string, directory string, env string, fileNames 
 			if er2a != nil {
 				switch er2a.(type) {
 				case viper.ConfigFileNotFoundError:
-					log.Println("config file not found")
+					break
 				default:
 					return nil, er2a
 				}
@@ -155,7 +155,7 @@ func LoadMapWithPath(parentPath string, directory string, env string, fileNames 
 			if er2b != nil {
 				switch er2b.(type) {
 				case viper.ConfigFileNotFoundError:
-					log.Println("config file not found")
+					break
 				default:
 					return nil, er2b
 				}
@@ -252,44 +252,4 @@ func fileExists(filename string) bool {
 		return false
 	}
 	return !info.IsDir()
-}
-
-func Trim(v string) string {
-	k0 := "\r\n"
-	k1 := "\r"
-	k2 := "\n"
-	x1 := "\n        "
-	x2 := "\n    "
-	x3 := "\n  "
-	x4 := "\n "
-	x5 := "\n"
-	x := ""
-	for strings.Index(v, k0) >= 0 {
-		v = strings.Replace(v, k0, k2, -1)
-	}
-	for strings.Index(v, k1) >= 0 {
-		v = strings.Replace(v, k1, k2, -1)
-	}
-	for strings.Index(v, x1) >= 0 {
-		v = strings.Replace(v, x2, x3, -1)
-	}
-	for strings.Index(v, x2) >= 0 {
-		v = strings.Replace(v, x2, x3, -1)
-	}
-	for strings.Index(v, x3) >= 0 {
-		v = strings.Replace(v, x3, x, -1)
-	}
-	for strings.Index(v, x4) >= 0 {
-		v = strings.Replace(v, x4, x, -1)
-	}
-	for strings.Index(v, x5) >= 0 {
-		v = strings.Replace(v, x5, x, -1)
-	}
-	return v
-}
-
-func TrimAll(v string) string {
-	s := Trim(v)
-	x := strings.Replace(s, "\": \"", "\":\"", -1)
-	return x
 }
