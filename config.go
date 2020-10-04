@@ -238,8 +238,8 @@ func LoadTextWithPath(parentPath string, directory string, env string, filename 
 	}
 	return string(rs), nil
 }
-func LoadTextWithEnv(directory string, env string, filename string) (string, error) {
-	return LoadTextWithPath("", directory, env, filename)
+func LoadTextWithEnv(env string, filename string) (string, error) {
+	return LoadTextWithPath("", "", env, filename)
 }
 func LoadText(filename string) (string, error) {
 	env := os.Getenv("ENV")
