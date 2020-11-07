@@ -3,11 +3,9 @@ package config
 import (
 	"fmt"
 	"github.com/spf13/viper"
-	"io/ioutil"
 	"log"
 	"os"
 	"reflect"
-	"strconv"
 	"strings"
 )
 
