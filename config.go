@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"github.com/spf13/viper"
 	"io/ioutil"
 	"log"
@@ -25,27 +26,42 @@ func LoadConfigWithEnv(parentPath string, directory string, env string, c interf
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_", ".", "_"))
 	viper.SetConfigType("yaml")
 
-	for _, fileName := range fileNames {
-		viper.SetConfigName(fileName)
-	}
+	fileCount := len(fileNames)
+	if fileCount > 0  {
+		if len(parentPath) == 0 && len(directory) == 0 {
+			viper.AddConfigPath("./")
+		} else {
+			viper.AddConfigPath("./" + directory + "/")
+			if len(parentPath) > 0 {
+				viper.AddConfigPath("./" + parentPath + "/" + directory + "/")
+			}
+		}
 
-	if len(parentPath) == 0 && len(directory) == 0 {
-		viper.AddConfigPath("./")
+		viper.SetConfigName(fileNames[0])
+		if er1 := viper.ReadInConfig(); er1 != nil {
+			switch er1.(type) {
+			case viper.ConfigFileNotFoundError:
+				log.Println("config file not found")
+			default:
+				return er1
+			}
+		}
+
+		for i:=1; i< fileCount; i++ {
+			viper.SetConfigName(fileNames[i])
+			if er2b := viper.MergeInConfig(); er2b != nil {
+				switch er2b.(type) {
+				case viper.ConfigFileNotFoundError:
+					break
+				default:
+					return er2b
+				}
+			}
+		}
 	} else {
-		viper.AddConfigPath("./" + directory + "/")
-		if len(parentPath) > 0 {
-			viper.AddConfigPath("./" + parentPath + "/" + directory + "/")
-		}
+		return fmt.Errorf("have no config file")
 	}
 
-	if er1 := viper.ReadInConfig(); er1 != nil {
-		switch er1.(type) {
-		case viper.ConfigFileNotFoundError:
-			log.Println("config file not found")
-		default:
-			return er1
-		}
-	}
 	if len(env) > 0 {
 		env2 := strings.ToLower(env)
 		for _, fileName2 := range fileNames {
