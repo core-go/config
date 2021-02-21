@@ -13,12 +13,24 @@ import (
 )
 
 func Load(c interface{}, fileNames ...string) error {
-	return LoadConfig("", "", c, fileNames...)
-}
-
-func LoadConfig(parentPath string, directory string, c interface{}, fileNames ...string) error {
 	env := os.Getenv("ENV")
-	return LoadConfigWithEnv(parentPath, directory, env, c, fileNames...)
+	if len(env) == 0 {
+		env = os.Getenv("APP_ENV")
+	}
+	if len(env) == 0 {
+		env = os.Getenv("ENVIRONMENT")
+	}
+	if len(env) == 0 {
+		env = os.Getenv("STATE")
+	}
+	if len(env) == 0 {
+		env = os.Getenv("APP_STATE")
+	}
+	return LoadConfigWithEnv("", "", env, c, fileNames...)
+}
+func LoadConfig(envName string, c interface{}, fileNames ...string) error {
+	env := os.Getenv(envName)
+	return LoadConfigWithEnv("", "", env, c, fileNames...)
 }
 // Load function will read config from environment or config file.
 func LoadConfigWithEnv(parentPath string, directory string, env string, c interface{}, fileNames ...string) error {
