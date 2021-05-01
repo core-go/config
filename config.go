@@ -32,14 +32,15 @@ func LoadConfig(envName string, c interface{}, fileNames ...string) error {
 	env := os.Getenv(envName)
 	return LoadConfigWithEnv("", "", env, c, fileNames...)
 }
-// Load function will read config from environment or config file.
+
+// LoadConfigWithEnv function will read config from environment or config file.
 func LoadConfigWithEnv(parentPath string, directory string, env string, c interface{}, fileNames ...string) error {
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer("-", "_", ".", "_"))
 	viper.SetConfigType("yaml")
 
 	fileCount := len(fileNames)
-	if fileCount > 0  {
+	if fileCount > 0 {
 		if len(parentPath) == 0 && len(directory) == 0 {
 			viper.AddConfigPath("./")
 		} else {
@@ -59,7 +60,7 @@ func LoadConfigWithEnv(parentPath string, directory string, env string, c interf
 			}
 		}
 
-		for i:=1; i< fileCount; i++ {
+		for i := 1; i < fileCount; i++ {
 			viper.SetConfigName(fileNames[i])
 			if er2b := viper.MergeInConfig(); er2b != nil {
 				switch er2b.(type) {
@@ -109,7 +110,7 @@ func LoadConfigWithEnv(parentPath string, directory string, env string, c interf
 	return er4
 }
 
-// bindEnvs function will bind ymal file to struc model
+// BindEnvs function will bind ymal file to struc model
 func BindEnvs(conf interface{}, parts ...string) error {
 	ifv := reflect.Indirect(reflect.ValueOf(conf))
 	ift := reflect.TypeOf(ifv)
@@ -228,7 +229,7 @@ func LoadFileWithPath(parentPath string, directory string, env string, filename 
 			if indexDot >= 0 {
 				file := "./" + filename[0:indexDot] + "-" + env + filename[indexDot:]
 				if !fileExists(file) {
-					file = "./" + parentPath +  "/" + filename[0:indexDot] + "-" + env + filename[indexDot:]
+					file = "./" + parentPath + "/" + filename[0:indexDot] + "-" + env + filename[indexDot:]
 				}
 				if fileExists(file) {
 					return ioutil.ReadFile(file)
