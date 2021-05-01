@@ -1,4 +1,4 @@
-module github.com/common-go/config
+module github.com/core-go/config
 
 go 1.11
 
