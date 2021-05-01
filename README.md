@@ -1,21 +1,20 @@
-# Config Loader for Golang 
-
+# config
 - Support to load the configurations
 - Support to merge the environment variables to the configurations
 - Support to override the configurations based on the environment (For example: SIT environment, UAT environment)
 
 ## Installation
 
-Please make sure to initialize a Go module before installing common-go/config:
+Please make sure to initialize a Go module before installing core-go/config:
 
 ```shell
-go get -u github.com/common-go/config
+go get -u github.com/core-go/config
 ```
 
 Import:
 
 ```go
-import "github.com/common-go/config"
+import "github.com/core-go/config"
 ```
 
 ## Example
