@@ -12,7 +12,6 @@ go get -u github.com/core-go/config
 ```
 
 Import:
-
 ```go
 import "github.com/core-go/config"
 ```
