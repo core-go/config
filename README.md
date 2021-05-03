@@ -4,7 +4,6 @@
 - Support to override the configurations based on the environment (For example: SIT environment, UAT environment)
 
 ## Installation
-
 Please make sure to initialize a Go module before installing core-go/config:
 
 ```shell
