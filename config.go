@@ -3,7 +3,6 @@ package config
 import (
 	"fmt"
 	"github.com/spf13/viper"
-	"io/ioutil"
 	"log"
 	"os"
 	"reflect"
@@ -214,7 +213,7 @@ func LoadFileWithPath(parentPath string, directory string, env string, filename 
 					file = "./" + parentPath + "/" + directory + "/" + filename[0:indexDot] + "-" + env + filename[indexDot:]
 				}
 				if fileExists(file) {
-					return ioutil.ReadFile(file)
+					return os.ReadFile(file)
 				}
 			}
 		}
@@ -222,7 +221,7 @@ func LoadFileWithPath(parentPath string, directory string, env string, filename 
 		if !fileExists(file) {
 			file = "./" + parentPath + "/" + directory + "/" + filename
 		}
-		return ioutil.ReadFile(file)
+		return os.ReadFile(file)
 	} else {
 		if len(env) > 0 {
 			indexDot := strings.LastIndex(filename, ".")
@@ -232,7 +231,7 @@ func LoadFileWithPath(parentPath string, directory string, env string, filename 
 					file = "./" + parentPath + "/" + filename[0:indexDot] + "-" + env + filename[indexDot:]
 				}
 				if fileExists(file) {
-					return ioutil.ReadFile(file)
+					return os.ReadFile(file)
 				}
 			}
 		}
@@ -240,7 +239,7 @@ func LoadFileWithPath(parentPath string, directory string, env string, filename 
 		if !fileExists(file) {
 			file = "./" + parentPath + "/" + filename
 		}
-		return ioutil.ReadFile(file)
+		return os.ReadFile(file)
 	}
 }
 func LoadFileWithEnv(env string, filename string) ([]byte, error) {
