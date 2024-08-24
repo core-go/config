@@ -52,11 +52,11 @@ type RootConfig struct {
 
 func main() {
 	env := os.Getenv("ENV")
-	var conf RootConfig
+	var cfg RootConfig
 	// "authentication" is the directory, which contains source code
 	// "configs" is the directory, which contains config.yaml and config-sit.yaml 
-	config.LoadConfigWithEnv("authentication", "configs", env, &conf, "config")
-	log.Println("config ", conf)
+	config.LoadConfigWithEnv("authentication", "configs", env, &cfg, "config")
+	log.Println("config ", cfg)
 
 	var conf2 RootConfig
 	config.Load(&conf2, "configs/config")

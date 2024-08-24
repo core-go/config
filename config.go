@@ -112,7 +112,7 @@ func LoadConfigWithEnv(parentPath string, directory string, env string, c interf
 // BindEnvs function will bind ymal file to struc model
 func BindEnvs(conf interface{}, parts ...string) error {
 	ifv := reflect.Indirect(reflect.ValueOf(conf))
-	ift := reflect.TypeOf(ifv)
+	ift := ifv.Type()
 	num := min(ift.NumField(), ifv.NumField())
 	for i := 0; i < num; i++ {
 		v := ifv.Field(i)
