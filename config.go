@@ -123,9 +123,15 @@ func BindEnvs(conf interface{}, parts ...string) error {
 		}
 		switch v.Kind() {
 		case reflect.Struct:
-			return BindEnvs(v.Interface(), append(parts, tv)...)
+			err := BindEnvs(v.Interface(), append(parts, tv)...)
+			if err != nil {
+				return err
+			}
 		default:
-			return viper.BindEnv(strings.Join(append(parts, tv), "."))
+			err := viper.BindEnv(strings.Join(append(parts, tv), "."))
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
